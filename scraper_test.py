@@ -4,6 +4,55 @@ from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
+import os
+
+import os
+import requests
+
+def enviar_pdf_directo_whatsapp(path_al_pdf, resumen_texto=""):
+    # Verificar que el archivo realmente se generó en el disco
+    if not os.path.exists(path_al_pdf):
+        print(f"❌ Error: El archivo {path_al_pdf} no existe en el directorio.")
+        return
+
+    INSTANCE_ID = os.getenv("WHATSAPP_INSTANCE")
+    TOKEN = os.getenv("WHATSAPP_TOKEN")
+    TU_TELEFONO = os.getenv("MI_TELEFONO")
+    
+    # Endpoint de UltraMsg para enviar archivos multimedia/documentos
+    url_api = f"https://ultramsg.com{INSTANCE_ID}/messages/document"
+
+    # Los parámetros de texto van en el diccionario 'data'
+    payload = {
+        "token": TOKEN,
+        "to": TU_TELEFONO,
+        "filename": os.path.basename(path_al_pdf), # Nombre que verá el usuario en WhatsApp
+        "caption": resumen_texto
+    }
+    
+    # Abrimos el archivo local en modo lectura binaria ('rb')
+    with open(path_al_pdf, 'rb') as f:
+        # El archivo físico se envía en el diccionario 'files'
+        files = {
+            'document': f
+        }
+        
+        try:
+            # Quitamos el encabezado urlencoded, requests maneja el multipart automáticamente
+            response = requests.post(url_api, data=payload, files=files)
+            if response.status_code == 200:
+                print(f"✅ PDF '{path_al_pdf}' enviado directamente a tu WhatsApp desde el disco local.")
+            else:
+                print(f"❌ Error de la API de WhatsApp: {response.text}")
+        except Exception as e:
+            print(f"💥 Falló la conexión con la API al subir el archivo: {e}")
+
+# Llama a esta función al final de tu flujo principal de Python, justo abajo de donde generas tu PDF:
+# nombre_del_pdf = "reporte_diario.pdf"
+# ... tu código que genera el PDF aquí ...
+# enviar_pdf_directo_whatsapp(nombre_del_pdf, "🤖 ¡Hola! Tu reporte inmobiliario de hoy se generó con éxito.")
+
+
 
 def buscar_inmuebles_del_dia():
     url = "https://dogapi.dog/api/v2/breeds"
@@ -63,6 +112,7 @@ def buscar_inmuebles_del_dia():
     story.append(tabla)
     
     doc.build(story)
+    enviar_pdf_directo_whatsapp(archivo_pdf, "🤖 ¡Hola! Tu reporte inmobiliario de hoy se generó con éxito.")
     print(f"Proceso terminado. {archivo_pdf}")
 
 if __name__ == "__main__":

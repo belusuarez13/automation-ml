@@ -10,30 +10,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
       - name: Install dependencies
-        run: pip install requests beautifulsoup4 reportlab
+        run: pip install requests reportlab google-genai
 
-      - name: Run Scraper
-        run: python scraper_test.py  # Aquí se genera el PDF
+      - name: Run Scraper and Send Directly to WhatsApp
+        env:
+          MELI_TOKEN: ${{ secrets.MELI_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          WHATSAPP_INSTANCE: ${{ secrets.WHATSAPP_INSTANCE }}
+          WHATSAPP_TOKEN: ${{ secrets.WHATSAPP_TOKEN }}
+          MI_TELEFONO: ${{ secrets.MI_TELEFONO }}
+        # Al correr el script, este genera el PDF en el disco temporal y lo despacha de inmediato
+        run: python scraper_test.py
 
-      # ESTO CREA UN ENLACE DE DESCARGA EN LA PESTAÑA "ACTIONS"
-      - name: Subir reporte como artefacto
-        uses: actions/upload-artifact@v4
-        with:
-          name: reporte-inmuebles-hoy
-          path: "*.pdf"  # Sube todos los PDFs generados
-          retention-days: 30  # Se borra automáticamente de GitHub en 30 días
-
-
-              #      - name: Run Scraper
-        # env:
-        #   MELI_TOKEN: ${{ secrets.MELI_TOKEN }}
-        #   GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        # run: python scraper_test.py
