@@ -20,12 +20,19 @@ jobs:
         run: pip install requests beautifulsoup4 reportlab
 
       - name: Run Scraper
-            run: python scraper_test.py  # Aquí se genera el PDF
+        run: python scraper_test.py  # Aquí se genera el PDF
 
-          # ESTO CREA UN ENLACE DE DESCARGA EN LA PESTAÑA "ACTIONS"
-          - name: Subir reporte como artefacto
-            uses: actions/upload-artifact@v4
-            with:
-              name: reporte-inmuebles-hoy
-              path: "*.pdf"  # Sube todos los PDFs generados
-              retention-days: 30  # Se borra automáticamente de GitHub en 30 días
+      # ESTO CREA UN ENLACE DE DESCARGA EN LA PESTAÑA "ACTIONS"
+      - name: Subir reporte como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: reporte-inmuebles-hoy
+          path: "*.pdf"  # Sube todos los PDFs generados
+          retention-days: 30  # Se borra automáticamente de GitHub en 30 días
+
+
+              #      - name: Run Scraper
+        # env:
+        #   MELI_TOKEN: ${{ secrets.MELI_TOKEN }}
+        #   GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        # run: python scraper_test.py
