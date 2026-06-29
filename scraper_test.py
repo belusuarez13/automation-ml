@@ -7,51 +7,42 @@ from reportlab.lib import colors
 import os
 import time
 
-def enviar_pdf_directo_whatsapp(path_al_pdf, resumen_texto=""):
-    time.sleep(30)
-    # Verificar que el archivo realmente se generó en el disco
+def enviar_pdf_telegram(path_al_pdf, resumen_texto=""):
+    time.sleep(10)
     if not os.path.exists(path_al_pdf):
-        print(f"❌ Error: El archivo {path_al_pdf} no existe en el directorio.")
+        print(f"❌ Error: El archivo {path_al_pdf} no existe.")
         return
 
-    INSTANCE_ID = os.getenv("WHATSAPP_INSTANCE")
-    TOKEN = os.getenv("WHATSAPP_TOKEN")
-    TU_TELEFONO = os.getenv("MI_TELEFONO")
-    
-    # Endpoint de UltraMsg para enviar archivos multimedia/documentos
-    url_api = f"https://api.ultramsg.com{INSTANCE_ID}/messages/document"
+    # Nuevas variables seguras
+    TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+    TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
-    # Los parámetros de texto van en el diccionario 'data'
+    if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
+        print("❌ Error: Faltan las variables de Telegram.")
+        return
+
+    # Endpoint nativo de Telegram para enviar archivos físicos
+    url = f"https://telegram.org{TELEGRAM_TOKEN}/sendDocument"
+
     payload = {
-        "token": TOKEN,
-        "to": TU_TELEFONO,
-        "filename": os.path.basename(path_al_pdf), # Nombre que verá el usuario en WhatsApp
-        "caption": resumen_texto
+        "chat_id": TELEGRAM_CHAT_ID,
+        "caption": resumen_texto, # Texto que acompaña al PDF
+        "parse_mode": "Markdown"  # Permite usar negritas con asteriscos
     }
-    
-    # Abrimos el archivo local en modo lectura binaria ('rb')
+
     with open(path_al_pdf, 'rb') as f:
-        # El archivo físico se envía en el diccionario 'files'
-        files = {
-            'document': f
-        }
-        
+        files = {'document': f}
         try:
-            # Quitamos el encabezado urlencoded, requests maneja el multipart automáticamente
-            response = requests.post(url_api, data=payload, files=files)
+            response = requests.post(url, data=payload, files=files)
             if response.status_code == 200:
-                print(f"✅ PDF '{path_al_pdf}' enviado directamente a tu WhatsApp desde el disco local.")
+                print("✅ ¡PDF enviado con éxito a Telegram de forma gratuita!")
             else:
-                print(f"❌ Error de la API de WhatsApp: {response.text}")
+                print(f"❌ Error de Telegram: {response.text}")
         except Exception as e:
-            print(f"💥 Falló la conexión con la API al subir el archivo: {e}")
+            print(f"💥 Falló la conexión con Telegram: {e}")
 
-# Llama a esta función al final de tu flujo principal de Python, justo abajo de donde generas tu PDF:
-# nombre_del_pdf = "reporte_diario.pdf"
-# ... tu código que genera el PDF aquí ...
-# enviar_pdf_directo_whatsapp(nombre_del_pdf, "🤖 ¡Hola! Tu reporte inmobiliario de hoy se generó con éxito.")
-
-
+# Llama a esta función al final de tu script en lugar de la de WhatsApp:
+# enviar_pdf_telegram("datos_2026-06-29.pdf", "📊 *Reporte Inmobiliario de Hoy*")
 
 def buscar_inmuebles_del_dia():
     url = "https://dogapi.dog/api/v2/breeds"
@@ -111,7 +102,7 @@ def buscar_inmuebles_del_dia():
     story.append(tabla)
     
     doc.build(story)
-    enviar_pdf_directo_whatsapp(archivo_pdf, "🤖 ¡Hola! Tu reporte inmobiliario de hoy se generó con éxito.")
+    enviar_pdf_telegram(archivo_pdf, "🤖 ¡Hola! Tu reporte inmobiliario de hoy se generó con éxito.")
     print(f"Proceso terminado. {archivo_pdf}")
 
 if __name__ == "__main__":

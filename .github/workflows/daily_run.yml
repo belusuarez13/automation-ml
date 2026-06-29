@@ -20,13 +20,12 @@ jobs:
       - name: Install dependencies
         run: pip install requests reportlab google-genai
 
-      - name: Run Scraper and Send Directly to WhatsApp
+      - name: Run Scraper and Send Directly to Telegram
         env:
           MELI_TOKEN: ${{ secrets.MELI_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          WHATSAPP_INSTANCE: ${{ secrets.WHATSAPP_INSTANCE }}
-          WHATSAPP_TOKEN: ${{ secrets.WHATSAPP_TOKEN }}
-          MI_TELEFONO: ${{ secrets.MI_TELEFONO }}
-        # Al correr el script, este genera el PDF en el disco temporal y lo despacha de inmediato
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python scraper_test.py
+
 
