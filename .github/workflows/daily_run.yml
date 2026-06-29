@@ -20,7 +20,7 @@ jobs:
         run: pip install requests beautifulsoup4 reportlab
 
       - name: Run Scraper
-            run: python scraper.py  # Aquí se genera el PDF
+            run: python scraper_test.py  # Aquí se genera el PDF
 
           # ESTO CREA UN ENLACE DE DESCARGA EN LA PESTAÑA "ACTIONS"
           - name: Subir reporte como artefacto
