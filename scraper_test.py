@@ -20,7 +20,7 @@ def enviar_pdf_directo_whatsapp(path_al_pdf, resumen_texto=""):
     TU_TELEFONO = os.getenv("MI_TELEFONO")
     
     # Endpoint de UltraMsg para enviar archivos multimedia/documentos
-    url_api = f"https://ultramsg.com{INSTANCE_ID}/messages/document"
+    url_api = f"https://api.ultramsg.com{INSTANCE_ID}/messages/document"
 
     # Los parámetros de texto van en el diccionario 'data'
     payload = {
