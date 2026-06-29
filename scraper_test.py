@@ -5,11 +5,10 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 import os
-
-import os
-import requests
+import time
 
 def enviar_pdf_directo_whatsapp(path_al_pdf, resumen_texto=""):
+    time.sleep(30)
     # Verificar que el archivo realmente se generó en el disco
     if not os.path.exists(path_al_pdf):
         print(f"❌ Error: El archivo {path_al_pdf} no existe en el directorio.")
