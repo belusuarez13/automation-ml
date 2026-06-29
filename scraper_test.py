@@ -22,7 +22,7 @@ def enviar_pdf_telegram(path_al_pdf, resumen_texto=""):
         return
 
     # Endpoint nativo de Telegram para enviar archivos físicos
-    url = f"https://telegram.org{TELEGRAM_TOKEN}/sendDocument"
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendDocument"
 
     payload = {
         "chat_id": TELEGRAM_CHAT_ID,
