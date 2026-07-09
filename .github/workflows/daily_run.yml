@@ -18,7 +18,8 @@ jobs:
           python-version: '3.10'
 
       - name: Install dependencies
-        run: pip install requests reportlab google-genai
+        run: pip install requests reportlab google-genai beautifulsoup4 python-dotenv
+
 
       - name: Run Scraper and Send Directly to Telegram
         env:
