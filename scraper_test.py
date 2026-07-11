@@ -15,10 +15,15 @@ from google import genai
 load_dotenv()
 
 def preparar_texto_reportlab(texto):
-    """Escapa caracteres especiales para que ReportLab no rompa el parser."""
+    """Escapa caracteres especiales y elimina tags HTML peligrosos para ReportLab."""
     if texto is None:
         return ""
-    return html.escape(str(texto), quote=False)
+
+    texto = str(texto)
+    texto = texto.replace("<", "&lt;").replace(">", "&gt;")
+    texto = texto.replace("&", "&amp;")
+    texto = re.sub(r"\s+", " ", texto).strip()
+    return texto
 
 
 def formatear_texto_para_reportlab(texto_markdown):
@@ -37,30 +42,22 @@ def formatear_texto_para_reportlab(texto_markdown):
             nivel = len(texto) - len(texto.lstrip("#"))
             contenido = re.sub(r"^#{1,3}\s*", "", texto)
             contenido = preparar_texto_reportlab(contenido)
-            contenido = re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", contenido)
-            contenido = re.sub(r"\*(.*?)\*", r"<i>\1</i>", contenido)
             elementos.append(("heading", (nivel, contenido)))
             continue
 
         if re.match(r"^[-*]\s+", texto):
             contenido = re.sub(r"^[-*]\s+", "", texto)
             contenido = preparar_texto_reportlab(contenido)
-            contenido = re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", contenido)
-            contenido = re.sub(r"\*(.*?)\*", r"<i>\1</i>", contenido)
             elementos.append(("bullet", contenido))
             continue
 
         if re.match(r"^\d+\.\s+", texto):
             contenido = re.sub(r"^\d+\.\s+", "", texto)
             contenido = preparar_texto_reportlab(contenido)
-            contenido = re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", contenido)
-            contenido = re.sub(r"\*(.*?)\*", r"<i>\1</i>", contenido)
             elementos.append(("number", contenido))
             continue
 
         contenido = preparar_texto_reportlab(texto)
-        contenido = re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", contenido)
-        contenido = re.sub(r"\*(.*?)\*", r"<i>\1</i>", contenido)
         elementos.append(("paragraph", contenido))
 
     return elementos
