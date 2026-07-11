@@ -7,7 +7,7 @@ import requests
 from bs4 import BeautifulSoup
 
 # URL de Apartamentos en Montevideo (Uruguay)
-URL = "https://www.infocasas.com.uy/venta/inmuebles/montevideo/baratos/publicado-ayer"
+URL = "https://www.infocasas.com.uy/venta/casas-y-apartamentos-y-terrenos-y-chacras-o-campos/montevideo/baratos/publicado-ayer"
 
 # CRITICAL: Define un User-Agent real para que no te detecten como un bot de inmediato
 HEADERS = {
@@ -78,8 +78,9 @@ def scraping_ml(guardar=False, nombre_archivo="propiedades.json"):
 
         print(f"Se encontraron {len(items)} propiedades en esta página:\n")
 
-        if guardar:
-            guardar_json(items, nombre_archivo)
+        responsePage2 = requests.get(URL + "/pagina2", headers=HEADERS, timeout=20)
+        itemsPage2 = extraer_propiedades_infocasas(responsePage2.text)
+        items.extend(itemsPage2)
 
         return items
 

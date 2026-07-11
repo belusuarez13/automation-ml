@@ -1,4 +1,5 @@
 import datetime
+import html
 import requests
 from reportlab.lib.pagesizes import letter
 from scraping_ml import scraping_ml
@@ -12,6 +13,13 @@ import time
 from google import genai
 
 load_dotenv()
+
+def preparar_texto_reportlab(texto):
+    """Escapa caracteres especiales para que ReportLab no rompa el parser."""
+    if texto is None:
+        return ""
+    return html.escape(str(texto), quote=False)
+
 
 def formatear_texto_para_reportlab(texto_markdown):
     """Convierte Markdown básico a bloques legibles para ReportLab."""
@@ -28,6 +36,7 @@ def formatear_texto_para_reportlab(texto_markdown):
         if re.match(r"^#{1,3}\s+", texto):
             nivel = len(texto) - len(texto.lstrip("#"))
             contenido = re.sub(r"^#{1,3}\s*", "", texto)
+            contenido = preparar_texto_reportlab(contenido)
             contenido = re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", contenido)
             contenido = re.sub(r"\*(.*?)\*", r"<i>\1</i>", contenido)
             elementos.append(("heading", (nivel, contenido)))
@@ -35,6 +44,7 @@ def formatear_texto_para_reportlab(texto_markdown):
 
         if re.match(r"^[-*]\s+", texto):
             contenido = re.sub(r"^[-*]\s+", "", texto)
+            contenido = preparar_texto_reportlab(contenido)
             contenido = re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", contenido)
             contenido = re.sub(r"\*(.*?)\*", r"<i>\1</i>", contenido)
             elementos.append(("bullet", contenido))
@@ -42,12 +52,14 @@ def formatear_texto_para_reportlab(texto_markdown):
 
         if re.match(r"^\d+\.\s+", texto):
             contenido = re.sub(r"^\d+\.\s+", "", texto)
+            contenido = preparar_texto_reportlab(contenido)
             contenido = re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", contenido)
             contenido = re.sub(r"\*(.*?)\*", r"<i>\1</i>", contenido)
             elementos.append(("number", contenido))
             continue
 
-        contenido = re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", texto)
+        contenido = preparar_texto_reportlab(texto)
+        contenido = re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", contenido)
         contenido = re.sub(r"\*(.*?)\*", r"<i>\1</i>", contenido)
         elementos.append(("paragraph", contenido))
 
@@ -253,19 +265,21 @@ def buscar_inmuebles_del_dia():
     story.append(Paragraph("<b>📊 Listado Completo de Propiedades:</b>", styles['Heading2']))
     story.append(Spacer(1, 10))
 
-    
-    def truncar_texto(texto, max_len=40):
-        texto = str(texto or "")
-        return texto if len(texto) <= max_len else texto[:max_len - 3] + "..."
+    def crear_celda_texto(valor, valor_por_defecto=""):
+        texto = str(valor or valor_por_defecto or "").strip()
+        if not texto:
+            texto = valor_por_defecto or "Sin información"
+        return Paragraph(preparar_texto_reportlab(texto), estilo_celda)
 
-    datos_tabla = [["Título", "Precio", "Ubicación", "Link"]] 
+    datos_tabla = [["Título", "Precio", "Ubicación", "Link"]]
     for p in results:
         link = p.get('link', '') or 'Sin link'
+        link_texto = f"<a href=\"{link}\" color=\"blue\">link</a>" if link != 'Sin link' else 'Sin link'
         datos_tabla.append([
-            truncar_texto(p.get('titulo', 'Sin título'), 35),
-            truncar_texto(p.get('precio', 'Consultar'), 20),
-            truncar_texto(p.get('direccion', 'No especificada'), 35),
-            Paragraph(f"<a href=\"{link}\" color=\"blue\">link</a>", estilo_celda)
+            crear_celda_texto(p.get('titulo', 'Sin título'), 'Sin título'),
+            crear_celda_texto(p.get('precio', 'Consultar'), 'Consultar'),
+            crear_celda_texto(p.get('direccion', 'No especificada'), 'No especificada'),
+            Paragraph(link_texto, estilo_celda)
         ])
     
     # Construcción estética de la tabla con ReportLab
