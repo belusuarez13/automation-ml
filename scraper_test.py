@@ -11,6 +11,6 @@ from scraping_terrenos import buscar_terrenos_del_dia
 load_dotenv()
 
 if __name__ == "__main__":
-    # buscar_inmuebles_del_dia()
-    # buscar_terrenos_del_dia()
+    buscar_inmuebles_del_dia()
+    buscar_terrenos_del_dia()
     buscar_inmuebles_del_dia_pde()
